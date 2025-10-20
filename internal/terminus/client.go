@@ -316,22 +316,42 @@ func decodePropertyDefinitionDocuments(r io.Reader) ([]propertyDefinitionDocumen
 	if len(trimmed) == 0 {
 		return nil, nil
 	}
-	switch trimmed[0] {
-	case '[':
+	if trimmed[0] == '[' {
 		var docs []propertyDefinitionDocument
 		if err := json.Unmarshal(trimmed, &docs); err != nil {
 			return nil, err
 		}
 		return docs, nil
-	case '{':
-		var doc propertyDefinitionDocument
-		if err := json.Unmarshal(trimmed, &doc); err != nil {
+	}
+
+	dec := json.NewDecoder(bytes.NewReader(trimmed))
+	docs := make([]propertyDefinitionDocument, 0, 1)
+	for {
+		var payload map[string]any
+		if err := dec.Decode(&payload); err != nil {
+			if err == io.EOF {
+				break
+			}
 			return nil, err
 		}
-		return []propertyDefinitionDocument{doc}, nil
-	default:
-		return nil, fmt.Errorf("terminus: unexpected property definition response: %s", string(trimmed))
+		if payload == nil {
+			continue
+		}
+		rawType, ok := payload["@type"].(string)
+		if !ok || rawType != "PropertyDefinition" {
+			continue
+		}
+		rawDoc, err := json.Marshal(payload)
+		if err != nil {
+			return nil, err
+		}
+		var doc propertyDefinitionDocument
+		if err := json.Unmarshal(rawDoc, &doc); err != nil {
+			return nil, err
+		}
+		docs = append(docs, doc)
 	}
+	return docs, nil
 }
 
 func (c *Client) documentURL(extra ...string) (string, error) {
