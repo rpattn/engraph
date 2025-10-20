@@ -17,12 +17,12 @@ A starting **Go Server** built with:
 
 1. **Start dependencies**
    - Postgres: `docker run --name engraph-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:14`
-   - TerminusDB: `docker run --name engraph-terminus -e TERMINUSDB_PASS=supersecret -p 6363:6363 -d terminusdb/terminusdb-server:latest`
+   - TerminusDB: `docker run --name engraph-terminus -e TERMINUSDB_ADMIN_PASS=supersecret -p 6363:6363 -d terminusdb/terminusdb-server:latest`
 2. **Copy the example configuration** and adjust database, TerminusDB, and session settings:
    ```bash
    cp example.config.yaml config.yaml
    ```
-   Make sure the Terminus credentials match how you started the container. If you used the command above, set:
+   Make sure the Terminus credentials match how you started the container (the container password flag is `TERMINUSDB_ADMIN_PASS`). If you used the command above, set:
 
    ```yaml
    terminus:
@@ -40,6 +40,8 @@ A starting **Go Server** built with:
    go run ./cmd/server
    ```
 5. **Open the GraphQL Playground** at [http://localhost:8080/graphql/playground](http://localhost:8080/graphql/playground). The playground is scoped by your login session, so sign in first using the existing auth endpoints or the sample forms under `/static/test.html`.
+
+> **Troubleshooting:** A `401 Authorization Required` error from TerminusDB usually means the password in `config.yaml` does not match the value supplied via `TERMINUSDB_ADMIN_PASS` when starting the container.
 
 ### Sample GraphQL operations
 

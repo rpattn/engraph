@@ -60,5 +60,6 @@ terminus:
   branch: "main"
   token: ""
   user: "admin"
+  # Matches the TERMINUSDB_ADMIN_PASS you set when starting the TerminusDB container
   password: "supersecret"
   timeout: "15s"
