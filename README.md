@@ -31,7 +31,9 @@ A starting **Go Server** built with:
    ```
 
    Alternatively you can supply `TERMINUS_TOKEN` if you are using TerminusDB Cloud; the service accepts either a bearer token or basic auth credentials for each request.
-3. **Run database migrations** to set up auth and metadata tables:
+3. **Run database migrations** to set up auth and metadata tables (this seeds a
+   couple of demo `Part` property definitions like `color` and `supplier` so the
+   sample mutations work out of the box):
    ```bash
    make migrate-up
    ```
@@ -100,6 +102,20 @@ mutation CreateEntity {
 ```
 
 Replace `<entity-id>` with an entity identifier returned from a previous query when testing relationship-backed properties.
+
+> Want to try different fields? Add more property definitions for your org with
+> SQL such as:
+>
+> ```sql
+> INSERT INTO entity_property_definitions (org_id, entity_type, property_name, property_type, ui_label)
+> SELECT id, 'Part', 'serial_number', 'string', 'Serial Number'
+> FROM organisations
+> WHERE slug = 'acme'
+> ON CONFLICT DO NOTHING;
+> ```
+
+Once the definition exists you can send the property in `customProperties` and
+it will be validated and stored in TerminusDB.
 
 ---
 
