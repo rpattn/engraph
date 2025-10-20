@@ -15,12 +15,10 @@ import (
 
 	"yourapp/internal/auth"
 	"yourapp/internal/models"
-	"yourapp/internal/repo"
 	"yourapp/internal/terminus"
 )
 
 type Service struct {
-	repo   repo.Repo
 	store  terminus.Store
 	schema graphql.Schema
 
@@ -32,8 +30,8 @@ type Service struct {
 	entityInput        *graphql.InputObject
 }
 
-func NewService(r repo.Repo, store terminus.Store) (*Service, error) {
-	svc := &Service{repo: r, store: store}
+func NewService(store terminus.Store) (*Service, error) {
+	svc := &Service{store: store}
 	svc.initTypes()
 	schema, err := graphql.NewSchema(graphql.SchemaConfig{
 		Query:    svc.queryType(),
@@ -508,7 +506,7 @@ func (s *Service) parseEntityInput(raw any) (models.EntityInput, error) {
 }
 
 func (s *Service) validateEntityInput(ctx context.Context, orgID uuid.UUID, input models.EntityInput) (models.EntityInput, error) {
-	defs, err := s.repo.ListEntityPropertyDefinitions(ctx, orgID, input.Type)
+	defs, err := s.store.ListPropertyDefinitions(ctx, orgID, input.Type)
 	if err != nil {
 		return models.EntityInput{}, err
 	}

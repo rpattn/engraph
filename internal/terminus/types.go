@@ -104,3 +104,16 @@ type relationshipDocument struct {
 	Target referenceValue `json:"target"`
 	OrgID  string         `json:"org_id"`
 }
+
+type propertyDefinitionDocument struct {
+	ID            string  `json:"@id,omitempty"`
+	Class         string  `json:"@type"`
+	OrgID         string  `json:"org_id"`
+	EntityType    string  `json:"entity_type"`
+	PropertyName  string  `json:"property_name"`
+	PropertyType  string  `json:"property_type"`
+	RefTargetType *string `json:"ref_target_type,omitempty"`
+	UILabel       *string `json:"ui_label,omitempty"`
+	IsFilterable  *bool   `json:"is_filterable,omitempty"`
+	CreatedAt     string  `json:"created_at,omitempty"`
+}

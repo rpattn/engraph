@@ -83,7 +83,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	graphService, err := appgraphql.NewService(r, terminusClient)
+	graphService, err := appgraphql.NewService(terminusClient)
 	if err != nil {
 		slog.Error("graphql service setup failed", "err", err)
 		os.Exit(1)

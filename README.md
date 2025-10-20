@@ -31,17 +31,28 @@ A starting **Go Server** built with:
    ```
 
    Alternatively you can supply `TERMINUS_TOKEN` if you are using TerminusDB Cloud; the service accepts either a bearer token or basic auth credentials for each request.
-3. **Run database migrations** to set up auth and metadata tables (this seeds a
-   couple of demo `Part` property definitions like `color` and `supplier` so the
-   sample mutations work out of the box):
+3. **Run database migrations** to set up auth and metadata tables:
    ```bash
    make migrate-up
    ```
-4. **Start the API server**:
+4. **Seed demo property definitions in TerminusDB** so the playground mutation works. Grab the organisation UUID from Postgres (the seed data creates an `acme` org) and replace `<org-uuid>` in [`docs/terminus/sample_property_definitions.json`](docs/terminus/sample_property_definitions.json) with that value.
+
+   ```bash
+   psql postgres://postgres:admin@localhost:5432/db -At -c "SELECT id FROM organisations WHERE slug = 'acme' LIMIT 1;"
+
+   curl -u admin:supersecret \
+     -H "Content-Type: application/json" \
+     -H "Prefer: return=representation" \
+     -X POST "http://localhost:6363/api/document/engraph/entities?branch=main" \
+     --data-binary @docs/terminus/sample_property_definitions.json
+   ```
+
+   Repeat the `curl` command for each org (update the `org_id` value) if you want to preload definitions across tenants.
+5. **Start the API server**:
    ```bash
    go run ./cmd/server
    ```
-5. **Open the GraphQL Playground** at [http://localhost:8080/graphql/playground](http://localhost:8080/graphql/playground). The playground is scoped by your login session, so sign in first using the existing auth endpoints or the sample forms under `/static/test.html`.
+6. **Open the GraphQL Playground** at [http://localhost:8080/graphql/playground](http://localhost:8080/graphql/playground). The playground is scoped by your login session, so sign in first using the existing auth endpoints or the sample forms under `/static/test.html`.
 
 > **Troubleshooting:** A `401 Authorization Required` error from TerminusDB usually means the password in `config.yaml` does not match the value supplied via `TERMINUSDB_ADMIN_PASS` when starting the container.
 
@@ -103,19 +114,7 @@ mutation CreateEntity {
 
 Replace `<entity-id>` with an entity identifier returned from a previous query when testing relationship-backed properties.
 
-> Want to try different fields? Add more property definitions for your org with
-> SQL such as:
->
-> ```sql
-> INSERT INTO entity_property_definitions (org_id, entity_type, property_name, property_type, ui_label)
-> SELECT id, 'Part', 'serial_number', 'string', 'Serial Number'
-> FROM organisations
-> WHERE slug = 'acme'
-> ON CONFLICT DO NOTHING;
-> ```
-
-Once the definition exists you can send the property in `customProperties` and
-it will be validated and stored in TerminusDB.
+> Want to try different fields? Add more property definition documents in TerminusDB. Copy the sample JSON, tweak the `property_name`, `property_type`, or `ref_target_type`, and POST it to the Terminus `document` endpoint with the matching `org_id`. Once the definition exists you can send the property in `customProperties` and it will be validated and stored in TerminusDB.
 
 ---
 

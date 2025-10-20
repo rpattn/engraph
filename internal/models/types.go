@@ -109,7 +109,7 @@ type OrgInvite struct {
 }
 
 type PropertyDefinition struct {
-	ID            int32
+	ID            string
 	OrgID         uuid.UUID
 	EntityType    string
 	PropertyName  string
@@ -117,7 +117,7 @@ type PropertyDefinition struct {
 	RefTargetType *string
 	UILabel       *string
 	IsFilterable  bool
-	CreatedAt     time.Time
+	CreatedAt     *time.Time
 }
 
 type CustomProperty struct {

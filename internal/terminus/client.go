@@ -41,6 +41,7 @@ type Store interface {
 	GetEntity(ctx context.Context, orgID uuid.UUID, id string) (models.Entity, error)
 	CreateEntity(ctx context.Context, orgID uuid.UUID, input models.EntityInput) (models.Entity, error)
 	UpdateEntity(ctx context.Context, orgID uuid.UUID, existing models.Entity, input models.EntityInput) (models.Entity, error)
+	ListPropertyDefinitions(ctx context.Context, orgID uuid.UUID, entityType string) ([]models.PropertyDefinition, error)
 }
 
 type Client struct {
@@ -226,6 +227,52 @@ func (c *Client) UpdateEntity(ctx context.Context, orgID uuid.UUID, existing mod
 	return entity, nil
 }
 
+func (c *Client) ListPropertyDefinitions(ctx context.Context, orgID uuid.UUID, entityType string) ([]models.PropertyDefinition, error) {
+	endpoint, err := c.documentURL()
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+	q := req.URL.Query()
+	q.Set("branch", c.cfg.Branch)
+	q.Set("type", "PropertyDefinition")
+	q.Set("prefixed", "false")
+	req.URL.RawQuery = q.Encode()
+	c.attachAuth(req)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("terminus list property definitions: %s: %s", resp.Status, string(body))
+	}
+	var docs []propertyDefinitionDocument
+	if err := json.NewDecoder(resp.Body).Decode(&docs); err != nil {
+		return nil, err
+	}
+	defs := make([]models.PropertyDefinition, 0, len(docs))
+	for _, doc := range docs {
+		def, err := doc.toModel()
+		if err != nil {
+			return nil, err
+		}
+		if def.OrgID != orgID {
+			continue
+		}
+		if entityType != "" && !strings.EqualFold(def.EntityType, entityType) {
+			continue
+		}
+		defs = append(defs, def)
+	}
+	return defs, nil
+}
+
 func (c *Client) writeDocuments(ctx context.Context, method string, payload []byte) (entityDocument, error) {
 	endpoint, err := c.documentURL()
 	if err != nil {
@@ -310,6 +357,35 @@ func buildCustomPropertyDocs(orgID uuid.UUID, existing *models.Entity, inputs []
 		docs = append(docs, doc)
 	}
 	return docs
+}
+
+func (d propertyDefinitionDocument) toModel() (models.PropertyDefinition, error) {
+	def := models.PropertyDefinition{
+		ID:            d.ID,
+		EntityType:    d.EntityType,
+		PropertyName:  d.PropertyName,
+		PropertyType:  d.PropertyType,
+		RefTargetType: d.RefTargetType,
+		UILabel:       d.UILabel,
+		IsFilterable:  true,
+	}
+	if d.IsFilterable != nil {
+		def.IsFilterable = *d.IsFilterable
+	}
+	if d.OrgID == "" {
+		return models.PropertyDefinition{}, fmt.Errorf("property definition %s missing org_id", d.ID)
+	}
+	uid, err := uuid.Parse(d.OrgID)
+	if err != nil {
+		return models.PropertyDefinition{}, fmt.Errorf("invalid org id on property definition %s: %w", d.ID, err)
+	}
+	def.OrgID = uid
+	if d.CreatedAt != "" {
+		if ts, err := time.Parse(time.RFC3339Nano, d.CreatedAt); err == nil {
+			def.CreatedAt = &ts
+		}
+	}
+	return def, nil
 }
 
 func (d entityDocument) toModel() (models.Entity, error) {
