@@ -61,9 +61,9 @@ func (s *Service) PlaygroundHandler() http.Handler {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>GraphQL Playground</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/graphql-playground-react@1.7.82/build/static/css/index.css" />
-    <link rel="shortcut icon" href="https://cdn.jsdelivr.net/npm/graphql-playground-react@1.7.82/build/favicon.png" />
-    <script src="https://cdn.jsdelivr.net/npm/graphql-playground-react@1.7.82/build/static/js/middleware.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/graphql-playground-react@1.7.42/build/static/css/index.css" />
+    <link rel="shortcut icon" href="https://cdn.jsdelivr.net/npm/graphql-playground-react@1.7.42/build/favicon.png" />
+    <script src="https://cdn.jsdelivr.net/npm/graphql-playground-react@1.7.42/build/static/js/middleware.js"></script>
     <style>
       body {
         margin: 0;
