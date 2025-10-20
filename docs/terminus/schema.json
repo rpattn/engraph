@@ -1,0 +1,51 @@
+{
+  "@context": {
+    "@base": "terminusdb:///data/",
+    "@schema": "terminusdb:///schema#"
+  },
+  "@graph": [
+    {
+      "@type": "Class",
+      "@id": "Entity",
+      "@key": { "@type": "Random" },
+      "org_id": "xsd:string",
+      "type": "xsd:string",
+      "name": "xsd:string",
+      "description": { "@type": "Optional", "@class": "xsd:string" },
+      "custom_properties": { "@type": "Set", "@class": "CustomProperty" },
+      "relationships": { "@type": "Set", "@class": "Relationship" },
+      "created_at": "xsd:dateTime",
+      "updated_at": "xsd:dateTime"
+    },
+    {
+      "@type": "Class",
+      "@id": "CustomProperty",
+      "@key": { "@type": "Random" },
+      "name": "xsd:string",
+      "value": { "@type": "Optional", "@class": "xsd:string" },
+      "ref_value": { "@type": "Optional", "@class": "Entity" },
+      "org_id": "xsd:string"
+    },
+    {
+      "@type": "Class",
+      "@id": "Relationship",
+      "@key": { "@type": "Random" },
+      "name": "xsd:string",
+      "target": "Entity",
+      "org_id": "xsd:string"
+    },
+    {
+      "@type": "Class",
+      "@id": "PropertyDefinition",
+      "@key": { "@type": "Random" },
+      "org_id": "xsd:string",
+      "entity_type": "xsd:string",
+      "property_name": "xsd:string",
+      "property_type": "xsd:string",
+      "ref_target_type": { "@type": "Optional", "@class": "xsd:string" },
+      "ui_label": { "@type": "Optional", "@class": "xsd:string" },
+      "is_filterable": { "@type": "Optional", "@class": "xsd:boolean" },
+      "created_at": { "@type": "Optional", "@class": "xsd:dateTime" }
+    }
+  ]
+}

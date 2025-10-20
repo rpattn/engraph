@@ -35,7 +35,18 @@ A starting **Go Server** built with:
    ```bash
    make migrate-up
    ```
-4. **Seed demo property definitions in TerminusDB** so the playground mutation works. Grab the organisation UUID from Postgres (the seed data creates an `acme` org) and replace `<org-uuid>` in [`docs/terminus/sample_property_definitions.json`](docs/terminus/sample_property_definitions.json) with that value.
+4. **Install the TerminusDB schema** so the database knows about `Entity`, `CustomProperty`, `Relationship`, and `PropertyDefinition` documents. Run this once per TerminusDB instance:
+
+   ```bash
+   curl -u admin:supersecret \
+     -H "Content-Type: application/json" \
+     -H "Prefer: return=representation" \
+     -X POST "http://localhost:6363/api/document/engraph/entities?graph_type=schema&branch=main" \
+     --data-binary @docs/terminus/schema.json
+   ```
+
+   If you changed the TerminusDB credentials, team, database, or branch in `config.yaml`, make sure the URL matches those settings.
+5. **Seed demo property definitions in TerminusDB** so the playground mutation works. Grab the organisation UUID from Postgres (the seed data creates an `acme` org) and replace `<org-uuid>` in [`docs/terminus/sample_property_definitions.json`](docs/terminus/sample_property_definitions.json) with that value.
 
    ```bash
    psql postgres://postgres:admin@localhost:5432/db -At -c "SELECT id FROM organisations WHERE slug = 'acme' LIMIT 1;"
@@ -48,11 +59,11 @@ A starting **Go Server** built with:
    ```
 
    Repeat the `curl` command for each org (update the `org_id` value) if you want to preload definitions across tenants.
-5. **Start the API server**:
+6. **Start the API server**:
    ```bash
    go run ./cmd/server
    ```
-6. **Open the GraphQL Playground** at [http://localhost:8080/graphql/playground](http://localhost:8080/graphql/playground). The playground is scoped by your login session, so sign in first using the existing auth endpoints or the sample forms under `/static/test.html`.
+7. **Open the GraphQL Playground** at [http://localhost:8080/graphql/playground](http://localhost:8080/graphql/playground). The playground is scoped by your login session, so sign in first using the existing auth endpoints or the sample forms under `/static/test.html`.
 
 > **Troubleshooting:** A `401 Authorization Required` error from TerminusDB usually means the password in `config.yaml` does not match the value supplied via `TERMINUSDB_ADMIN_PASS` when starting the container.
 
