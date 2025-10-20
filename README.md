@@ -22,6 +22,15 @@ A starting **Go Server** built with:
    ```bash
    cp example.config.yaml config.yaml
    ```
+   Make sure the Terminus credentials match how you started the container. If you used the command above, set:
+
+   ```yaml
+   terminus:
+     user: admin
+     password: supersecret
+   ```
+
+   Alternatively you can supply `TERMINUS_TOKEN` if you are using TerminusDB Cloud; the service accepts either a bearer token or basic auth credentials for each request.
 3. **Run database migrations** to set up auth and metadata tables:
    ```bash
    make migrate-up

@@ -59,4 +59,6 @@ terminus:
   database: "entities"
   branch: "main"
   token: ""
+  user: "admin"
+  password: "supersecret"
   timeout: "15s"

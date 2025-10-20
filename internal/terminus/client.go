@@ -24,6 +24,8 @@ type Config struct {
 	Database string
 	Branch   string
 	Token    string
+	User     string
+	Password string
 	Timeout  time.Duration
 }
 
@@ -61,6 +63,9 @@ func NewClient(cfg Config) (*Client, error) {
 	}
 	if cfg.Timeout == 0 {
 		cfg.Timeout = 15 * time.Second
+	}
+	if cfg.Token == "" && (cfg.User == "" || cfg.Password == "") {
+		return nil, fmt.Errorf("terminus authentication required: provide token or username/password")
 	}
 	return &Client{
 		httpClient: &http.Client{Timeout: cfg.Timeout},
@@ -269,6 +274,10 @@ func (c *Client) documentURL(extra ...string) (string, error) {
 func (c *Client) attachAuth(req *http.Request) {
 	if c.cfg.Token != "" {
 		req.Header.Set("Authorization", "Bearer "+c.cfg.Token)
+		return
+	}
+	if c.cfg.User != "" || c.cfg.Password != "" {
+		req.SetBasicAuth(c.cfg.User, c.cfg.Password)
 	}
 }
 

@@ -74,6 +74,8 @@ func main() {
 		Database: cfg.Terminus.Database,
 		Branch:   cfg.Terminus.Branch,
 		Token:    cfg.Terminus.Token,
+		User:     cfg.Terminus.User,
+		Password: cfg.Terminus.Password,
 		Timeout:  cfg.Terminus.Timeout,
 	})
 	if err != nil {
