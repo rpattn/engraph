@@ -252,8 +252,8 @@ func (c *Client) ListPropertyDefinitions(ctx context.Context, orgID uuid.UUID, e
 		body, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("terminus list property definitions: %s: %s", resp.Status, string(body))
 	}
-	var docs []propertyDefinitionDocument
-	if err := json.NewDecoder(resp.Body).Decode(&docs); err != nil {
+	docs, err := decodePropertyDefinitionDocuments(resp.Body)
+	if err != nil {
 		return nil, err
 	}
 	defs := make([]models.PropertyDefinition, 0, len(docs))
@@ -305,6 +305,33 @@ func (c *Client) writeDocuments(ctx context.Context, method string, payload []by
 		return entityDocument{}, fmt.Errorf("terminus: empty response")
 	}
 	return docs[0], nil
+}
+
+func decodePropertyDefinitionDocuments(r io.Reader) ([]propertyDefinitionDocument, error) {
+	data, err := io.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) == 0 {
+		return nil, nil
+	}
+	switch trimmed[0] {
+	case '[':
+		var docs []propertyDefinitionDocument
+		if err := json.Unmarshal(trimmed, &docs); err != nil {
+			return nil, err
+		}
+		return docs, nil
+	case '{':
+		var doc propertyDefinitionDocument
+		if err := json.Unmarshal(trimmed, &doc); err != nil {
+			return nil, err
+		}
+		return []propertyDefinitionDocument{doc}, nil
+	default:
+		return nil, fmt.Errorf("terminus: unexpected property definition response: %s", string(trimmed))
+	}
 }
 
 func (c *Client) documentURL(extra ...string) (string, error) {
