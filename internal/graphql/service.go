@@ -54,6 +54,50 @@ func (s *Service) Handler() http.Handler {
 	})
 }
 
+func (s *Service) PlaygroundHandler() http.Handler {
+	const playgroundHTML = `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GraphQL Playground</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/graphql-playground-react@1.7.82/build/static/css/index.css" />
+    <link rel="shortcut icon" href="https://cdn.jsdelivr.net/npm/graphql-playground-react@1.7.82/build/favicon.png" />
+    <script src="https://cdn.jsdelivr.net/npm/graphql-playground-react@1.7.82/build/static/js/middleware.js"></script>
+    <style>
+      body {
+        margin: 0;
+        background: #172a3a;
+      }
+      #root {
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      window.addEventListener('load', function () {
+        const url = new URL(window.location.href);
+        const basePath = url.pathname.replace(/\/playground$/, '');
+        const endpoint = basePath === '' ? '/graphql' : basePath;
+        GraphQLPlayground.init(document.getElementById('root'), {
+          endpoint,
+          settings: {
+            'request.credentials': 'include'
+          }
+        });
+      });
+    </script>
+  </body>
+</html>`
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		_, _ = w.Write([]byte(playgroundHTML))
+	})
+}
+
 func (s *Service) initTypes() {
 	s.entityType = graphql.NewObject(graphql.ObjectConfig{
 		Name: "Entity",

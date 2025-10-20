@@ -13,6 +13,85 @@ A starting **Go Server** built with:
 
 ---
 
+## ⚡ Quickstart
+
+1. **Start dependencies**
+   - Postgres: `docker run --name engraph-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:14`
+   - TerminusDB: `docker run --name engraph-terminus -e TERMINUSDB_PASS=supersecret -p 6363:6363 -d terminusdb/terminusdb-server:latest`
+2. **Copy the example configuration** and adjust database, TerminusDB, and session settings:
+   ```bash
+   cp example.config.yaml config.yaml
+   ```
+3. **Run database migrations** to set up auth and metadata tables:
+   ```bash
+   make migrate-up
+   ```
+4. **Start the API server**:
+   ```bash
+   go run ./cmd/server
+   ```
+5. **Open the GraphQL Playground** at [http://localhost:8080/graphql/playground](http://localhost:8080/graphql/playground). The playground is scoped by your login session, so sign in first using the existing auth endpoints or the sample forms under `/static/test.html`.
+
+### Sample GraphQL operations
+
+Use these documents directly in the playground to exercise the Terminus-backed entity API once you are authenticated.
+
+**Query entities**
+
+```graphql
+query ListParts {
+  entities(filter: { type: "Part" }, limit: 10) {
+    id
+    name
+    description
+    customProperties {
+      name
+      value
+      refValue {
+        id
+        name
+      }
+    }
+    relationships {
+      name
+      target {
+        id
+        name
+      }
+    }
+  }
+}
+```
+
+**Create an entity**
+
+```graphql
+mutation CreateEntity {
+  createEntity(
+    input: {
+      type: "Part"
+      name: "Widget"
+      description: "Demo component"
+      customProperties: [
+        { name: "color", value: "blue" }
+        { name: "supplier", refValueId: "<entity-id>" }
+      ]
+    }
+  ) {
+    id
+    name
+    customProperties {
+      name
+      value
+    }
+  }
+}
+```
+
+Replace `<entity-id>` with an entity identifier returned from a previous query when testing relationship-backed properties.
+
+---
+
 ## 🚀 Project Goals
 
 - Provide a robust authentication/authorization foundation.

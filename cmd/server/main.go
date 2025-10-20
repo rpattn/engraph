@@ -156,9 +156,10 @@ func main() {
 			})
 	})
 
-	// GraphQL endpoint secured for authenticated users with viewer role or higher
-	mux.With(middleware.RequireAuth(r), middleware.RequireRole(r, models.RoleViewer)).
-		Handle("/graphql", graphService.Handler())
+	// GraphQL endpoints secured for authenticated users with viewer role or higher
+	graphqlRoutes := mux.With(middleware.RequireAuth(r), middleware.RequireRole(r, models.RoleViewer))
+	graphqlRoutes.Handle("/graphql/playground", graphService.PlaygroundHandler())
+	graphqlRoutes.Handle("/graphql", graphService.Handler())
 
 	// Work orders and tasks routes
 	handlers.RegisterRoutes(mux, r)
