@@ -18,12 +18,14 @@ import (
 	"yourapp/internal/auth"
 	"yourapp/internal/config"
 	db "yourapp/internal/db/gen"
+	appgraphql "yourapp/internal/graphql"
 	"yourapp/internal/handlers"
 	"yourapp/internal/logging"
 	"yourapp/internal/middleware"
 	"yourapp/internal/models"
 	"yourapp/internal/repo"
 	"yourapp/internal/session"
+	"yourapp/internal/terminus"
 )
 
 func main() {
@@ -65,6 +67,25 @@ func main() {
 	// sqlc queries + repo wrapper
 	q := db.New(pool)
 	r := repo.New(q)
+
+	terminusClient, err := terminus.NewClient(terminus.Config{
+		BaseURL:  cfg.Terminus.BaseURL,
+		Team:     cfg.Terminus.Team,
+		Database: cfg.Terminus.Database,
+		Branch:   cfg.Terminus.Branch,
+		Token:    cfg.Terminus.Token,
+		Timeout:  cfg.Terminus.Timeout,
+	})
+	if err != nil {
+		slog.Error("terminus client setup failed", "err", err)
+		os.Exit(1)
+	}
+
+	graphService, err := appgraphql.NewService(r, terminusClient)
+	if err != nil {
+		slog.Error("graphql service setup failed", "err", err)
+		os.Exit(1)
+	}
 
 	// --- Setup OAuth/OIDC providers ---
 	providers := auth.SetupProviders(cfg)
@@ -134,6 +155,10 @@ func main() {
 				w.Write([]byte("create project"))
 			})
 	})
+
+	// GraphQL endpoint secured for authenticated users with viewer role or higher
+	mux.With(middleware.RequireAuth(r), middleware.RequireRole(r, models.RoleViewer)).
+		Handle("/graphql", graphService.Handler())
 
 	// Work orders and tasks routes
 	handlers.RegisterRoutes(mux, r)

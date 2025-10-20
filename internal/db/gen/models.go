@@ -10,6 +10,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type EntityPropertyDefinition struct {
+	ID            int32            `db:"id" json:"id"`
+	OrgID         pgtype.UUID      `db:"org_id" json:"org_id"`
+	EntityType    string           `db:"entity_type" json:"entity_type"`
+	PropertyName  string           `db:"property_name" json:"property_name"`
+	PropertyType  string           `db:"property_type" json:"property_type"`
+	RefTargetType pgtype.Text      `db:"ref_target_type" json:"ref_target_type"`
+	UiLabel       pgtype.Text      `db:"ui_label" json:"ui_label"`
+	IsFilterable  pgtype.Bool      `db:"is_filterable" json:"is_filterable"`
+	CreatedAt     pgtype.Timestamp `db:"created_at" json:"created_at"`
+}
+
 type Identity struct {
 	ID       pgtype.UUID `db:"id" json:"id"`
 	UserID   pgtype.UUID `db:"user_id" json:"user_id"`

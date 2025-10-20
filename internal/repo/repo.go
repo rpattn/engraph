@@ -54,8 +54,12 @@ type Repo interface {
 	GetInviteByTokenHash(ctx context.Context, tokenHash string) (models.OrgInvite, error)
 	UseInvite(ctx context.Context, tokenHash string) error
 
-	// Local credential management
-	UpdateLocalPasswordHash(ctx context.Context, userID uuid.UUID, phc string) error
+        // Local credential management
+        UpdateLocalPasswordHash(ctx context.Context, userID uuid.UUID, phc string) error
+
+        // Entity property definitions
+        ListEntityPropertyDefinitions(ctx context.Context, orgID uuid.UUID, entityType string) ([]models.PropertyDefinition, error)
+        GetEntityPropertyDefinition(ctx context.Context, orgID uuid.UUID, entityType, propertyName string) (models.PropertyDefinition, error)
 }
 
 // pgRepo wraps the sqlc Queries.

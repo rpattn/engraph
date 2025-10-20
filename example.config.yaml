@@ -51,3 +51,12 @@ google:
 github:
   client_id: ""        # e.g. "Iv1.1234567890abcdef"
   client_secret: ""
+
+# TerminusDB connection
+terminus:
+  base_url: "http://localhost:6363"
+  team: "engraph"
+  database: "entities"
+  branch: "main"
+  token: ""
+  timeout: "15s"
