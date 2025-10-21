@@ -18,6 +18,16 @@ type Config struct {
 	Database struct {
 		URL string `mapstructure:"url"`
 	} `mapstructure:"database"`
+	Terminus struct {
+		BaseURL  string        `mapstructure:"base_url"`
+		Team     string        `mapstructure:"team"`
+		Database string        `mapstructure:"database"`
+		Branch   string        `mapstructure:"branch"`
+		Token    string        `mapstructure:"token"`
+		User     string        `mapstructure:"user"`
+		Password string        `mapstructure:"password"`
+		Timeout  time.Duration `mapstructure:"timeout"`
+	} `mapstructure:"terminus"`
 	Logging struct {
 		Level  string `mapstructure:"level"`
 		Format string `mapstructure:"format"`
@@ -83,6 +93,9 @@ func Load() Config {
 	viper.SetDefault("security.rate_limit.ttl", "30m")
 	viper.SetDefault("security.denylist.enabled", true)
 
+	viper.SetDefault("terminus.branch", "main")
+	viper.SetDefault("terminus.timeout", "15s")
+
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
@@ -117,6 +130,14 @@ func Load() Config {
 	_ = viper.BindEnv("google.client_secret", "GOOGLE_CLIENT_SECRET")
 	_ = viper.BindEnv("github.client_id", "GITHUB_CLIENT_ID")
 	_ = viper.BindEnv("github.client_secret", "GITHUB_CLIENT_SECRET")
+	_ = viper.BindEnv("terminus.base_url", "TERMINUS_BASE_URL")
+	_ = viper.BindEnv("terminus.team", "TERMINUS_TEAM")
+	_ = viper.BindEnv("terminus.database", "TERMINUS_DATABASE")
+	_ = viper.BindEnv("terminus.branch", "TERMINUS_BRANCH")
+	_ = viper.BindEnv("terminus.token", "TERMINUS_TOKEN")
+	_ = viper.BindEnv("terminus.user", "TERMINUS_USER")
+	_ = viper.BindEnv("terminus.password", "TERMINUS_PASSWORD")
+	_ = viper.BindEnv("terminus.timeout", "TERMINUS_TIMEOUT")
 
 	var c Config
 	if err := viper.Unmarshal(&c); err != nil {

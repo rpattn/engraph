@@ -32,43 +32,43 @@ const (
 )
 
 type User struct {
-    ID    uuid.UUID
-    Email string
-    Name  string
-    AvatarURL string
-    Phone string
-    Country string
+	ID        uuid.UUID
+	Email     string
+	Name      string
+	AvatarURL string
+	Phone     string
+	Country   string
 }
 
 type LinkedIdentity struct {
-    Provider string
-    Subject  string
+	Provider string
+	Subject  string
 }
 
 type OrgSummary struct {
-    ID       uuid.UUID
-    Slug     string
-    Name     string
-    Role     OrgRole
-    CreatedAt time.Time
+	ID        uuid.UUID
+	Slug      string
+	Name      string
+	Role      OrgRole
+	CreatedAt time.Time
 }
 
 type Location struct {
-    ID        uuid.UUID `json:"id"`
-    Name      string    `json:"name"`
-    CreatedAt time.Time `json:"created_at"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Team struct {
-    ID        uuid.UUID `json:"id"`
-    Name      string    `json:"name"`
-    CreatedAt time.Time `json:"created_at"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Asset struct {
-    ID        uuid.UUID `json:"id"`
-    Name      string    `json:"name"`
-    CreatedAt time.Time `json:"created_at"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 var (
@@ -91,19 +91,76 @@ type LocalCredential struct {
 }
 
 type Session struct {
-    UserID    uuid.UUID
-    ActiveOrg uuid.UUID
-    Provider  string
-    Expiry    time.Time
+	UserID    uuid.UUID
+	ActiveOrg uuid.UUID
+	Provider  string
+	Expiry    time.Time
 }
 
 // OrgInvite represents an invitation to join an organisation.
 type OrgInvite struct {
-    TokenHash string
-    OrgID     uuid.UUID
-    Email     string
-    Role      OrgRole
-    InviterID uuid.UUID
-    ExpiresAt time.Time
-    UsedAt    time.Time
+	TokenHash string
+	OrgID     uuid.UUID
+	Email     string
+	Role      OrgRole
+	InviterID uuid.UUID
+	ExpiresAt time.Time
+	UsedAt    time.Time
+}
+
+type PropertyDefinition struct {
+	ID            string
+	OrgID         uuid.UUID
+	EntityType    string
+	PropertyName  string
+	PropertyType  string
+	RefTargetType *string
+	UILabel       *string
+	IsFilterable  bool
+	CreatedAt     *time.Time
+}
+
+type CustomProperty struct {
+	ID         string
+	Name       string
+	Value      *string
+	RefValueID *string
+	OrgID      uuid.UUID
+}
+
+type Relationship struct {
+	ID       string
+	Name     string
+	TargetID string
+	OrgID    uuid.UUID
+}
+
+type Entity struct {
+	ID               string
+	OrgID            uuid.UUID
+	Type             string
+	Name             string
+	Description      *string
+	CustomProperties []CustomProperty
+	Relationships    []Relationship
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+}
+
+type EntityFilter struct {
+	Type         *string
+	NameContains *string
+}
+
+type PropertyInput struct {
+	Name       string
+	Value      *string
+	RefValueID *string
+}
+
+type EntityInput struct {
+	Type             string
+	Name             string
+	Description      *string
+	CustomProperties []PropertyInput
 }

@@ -7,6 +7,8 @@ require (
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/go-chi/cors v1.2.2
 	github.com/google/uuid v1.6.0
+	github.com/graphql-go/graphql v0.8.1
+	github.com/graphql-go/handler v0.2.4
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/pquerna/otp v1.5.0
 	github.com/spf13/viper v1.20.1

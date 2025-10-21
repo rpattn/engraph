@@ -1,0 +1,29 @@
+[
+  {
+    "@context": {
+      "@base": "terminusdb:///data/",
+      "@schema": "terminusdb:///schema#"
+    },
+    "@type": "PropertyDefinition",
+    "org_id": "<org-uuid>",
+    "entity_type": "Part",
+    "property_name": "color",
+    "property_type": "string",
+    "ui_label": "Color",
+    "is_filterable": true
+  },
+  {
+    "@context": {
+      "@base": "terminusdb:///data/",
+      "@schema": "terminusdb:///schema#"
+    },
+    "@type": "PropertyDefinition",
+    "org_id": "<org-uuid>",
+    "entity_type": "Part",
+    "property_name": "supplier",
+    "property_type": "ref",
+    "ref_target_type": "Supplier",
+    "ui_label": "Supplier",
+    "is_filterable": true
+  }
+]

@@ -13,6 +13,122 @@ A starting **Go Server** built with:
 
 ---
 
+## ⚡ Quickstart
+
+1. **Start dependencies**
+   - Postgres: `docker run --name engraph-postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:14`
+   - TerminusDB: `docker run --name engraph-terminus -e TERMINUSDB_ADMIN_PASS=supersecret -p 6363:6363 -d terminusdb/terminusdb-server:latest`
+2. **Copy the example configuration** and adjust database, TerminusDB, and session settings:
+   ```bash
+   cp example.config.yaml config.yaml
+   ```
+   Make sure the Terminus credentials match how you started the container (the container password flag is `TERMINUSDB_ADMIN_PASS`). If you used the command above, set:
+
+   ```yaml
+   terminus:
+     user: admin
+     password: supersecret
+   ```
+
+   Alternatively you can supply `TERMINUS_TOKEN` if you are using TerminusDB Cloud; the service accepts either a bearer token or basic auth credentials for each request.
+3. **Run database migrations** to set up auth and metadata tables:
+   ```bash
+   make migrate-up
+   ```
+4. **Install the TerminusDB schema** so the database knows about `Entity`, `CustomProperty`, `Relationship`, and `PropertyDefinition` documents. Run this once per TerminusDB instance:
+
+   ```bash
+   curl -u admin:supersecret \
+     -H "Content-Type: application/json" \
+     -H "Prefer: return=representation" \
+     -X POST "http://localhost:6363/api/document/engraph/entities?graph_type=schema&branch=main" \
+     --data-binary @docs/terminus/schema.json
+   ```
+
+   If you changed the TerminusDB credentials, team, database, or branch in `config.yaml`, make sure the URL matches those settings.
+5. **Seed demo property definitions in TerminusDB** so the playground mutation works. Grab the organisation UUID from Postgres (the seed data creates an `acme` org) and replace `<org-uuid>` in [`docs/terminus/sample_property_definitions.json`](docs/terminus/sample_property_definitions.json) with that value.
+
+   ```bash
+   psql postgres://postgres:admin@localhost:5432/db -At -c "SELECT id FROM organisations WHERE slug = 'acme' LIMIT 1;"
+
+   curl -u admin:supersecret \
+     -H "Content-Type: application/json" \
+     -H "Prefer: return=representation" \
+     -X POST "http://localhost:6363/api/document/engraph/entities?branch=main" \
+     --data-binary @docs/terminus/sample_property_definitions.json
+   ```
+
+   Repeat the `curl` command for each org (update the `org_id` value) if you want to preload definitions across tenants.
+6. **Start the API server**:
+   ```bash
+   go run ./cmd/server
+   ```
+7. **Open the GraphQL Playground** at [http://localhost:8080/graphql/playground](http://localhost:8080/graphql/playground). The playground is scoped by your login session, so sign in first using the existing auth endpoints or the sample forms under `/static/test.html`.
+
+> **Troubleshooting:** A `401 Authorization Required` error from TerminusDB usually means the password in `config.yaml` does not match the value supplied via `TERMINUSDB_ADMIN_PASS` when starting the container.
+
+### Sample GraphQL operations
+
+Use these documents directly in the playground to exercise the Terminus-backed entity API once you are authenticated.
+
+**Query entities**
+
+```graphql
+query ListParts {
+  entities(filter: { type: "Part" }, limit: 10) {
+    id
+    name
+    description
+    customProperties {
+      name
+      value
+      refValue {
+        id
+        name
+      }
+    }
+    relationships {
+      name
+      target {
+        id
+        name
+      }
+    }
+  }
+}
+```
+
+**Create an entity**
+
+```graphql
+mutation CreateEntity {
+  createEntity(
+    input: {
+      type: "Part"
+      name: "Widget"
+      description: "Demo component"
+      customProperties: [
+        { name: "color", value: "blue" }
+        { name: "supplier", refValueId: "<entity-id>" }
+      ]
+    }
+  ) {
+    id
+    name
+    customProperties {
+      name
+      value
+    }
+  }
+}
+```
+
+Replace `<entity-id>` with an entity identifier returned from a previous query when testing relationship-backed properties.
+
+> Want to try different fields? Add more property definition documents in TerminusDB. Copy the sample JSON, tweak the `property_name`, `property_type`, or `ref_target_type`, and POST it to the Terminus `document` endpoint with the matching `org_id`. Once the definition exists you can send the property in `customProperties` and it will be validated and stored in TerminusDB.
+
+---
+
 ## 🚀 Project Goals
 
 - Provide a robust authentication/authorization foundation.
